@@ -1,0 +1,13 @@
+{
+  "name": "figments-injector",
+  "version": "1.0.0",
+  "description": "A tool to inject plugins to Figma's desktop app.",
+  "main": "index.js",
+  "author": "Ahmed Al Haddad <ahmed.hdd@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "asar": "^0.14.3",
+    "fs-extra": "^7.0.0",
+    "inject-code": "^1.0.0"
+  }
+}
