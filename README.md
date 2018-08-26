@@ -13,7 +13,7 @@ A helper tool that injects Figments (Figma Plugins) into Figma's desktop apps.
 1. That's it!  Run Figma's desktop app and you'll see a a message in devtools console confriming that it worked.
 
 ## Todo
-[ ] Inject Figments instead of dumb code.
-[ ] Add support for Windows.
-[ ] Create a GUI app.
-[ ] Ship it!
+- [ ] Inject Figments instead of dumb code.
+- [ ] Add support for Windows.
+- [ ] Create a GUI app.
+- [ ] Ship it!
