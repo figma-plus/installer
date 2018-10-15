@@ -5,9 +5,20 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 // setup paths
+let originalAsar;
+let backupAsar;
 
-var originalAsar = '/Applications/Figma.app/Contents/Resources/app.asar';
-var backupAsar = '/Applications/Figma.app/Contents/Resources/app.asar.bk';
+switch(process.platform) {
+  case 'darwin':
+    originalAsar = '/Applications/Figma.app/Contents/Resources/app.asar';
+    backupAsar = '/Applications/Figma.app/Contents/Resources/app.asar.bk';
+    break;
+  case 'win32':
+      throw new Error("Windows support is a work in progress.");
+    break;
+  default:
+    throw new Error("This platform is not supported at this time.");
+}
 
 var input = './input';
 var output = "./output/app.asar";
