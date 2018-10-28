@@ -3,11 +3,33 @@ const inject = require('inject-code');
 var fs = require('fs-extra');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const { join } = require('path');
 
 // setup paths
+let originalAsar;
+switch (process.platform) {
+  case 'darwin':
+    originalAsar = '/Applications/Figma.app/Contents/Resources/app.asar';
+    break;
+  case 'win32':
+    // the asar is in a versioned directory on windows,
+    // so need to figure out the directory name
 
-var originalAsar = '/Applications/Figma.app/Contents/Resources/app.asar';
-var backupAsar = '/Applications/Figma.app/Contents/Resources/app.asar.bk';
+    const figmaDir = `${process.env.LOCALAPPDATA}/Figma`;
+    const dirs = fs.readdirSync(figmaDir)
+      .filter(f =>
+        fs.statSync(join(figmaDir, f)).isDirectory()
+        && f.startsWith('app-'));
+    
+    // put the newest version at the top
+    dirs.sort().reverse();
+
+    originalAsar = `${figmaDir}/${dirs[0]}/resources/app.asar`;
+    break;
+  default:
+    throw new Error('This platform is not supported at this time.');
+}
+const backupAsar = `${originalAsar}.bk`;
 
 var input = './input';
 var output = "./output/app.asar";
