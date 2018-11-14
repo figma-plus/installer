@@ -1,12 +1,14 @@
-const { Menu, shell } = require('electron')
+const { Menu, shell, systemPreferences } = require('electron')
 var menubar = require('menubar')
+
+const icon = systemPreferences.isDarkMode() ? 'icon-dark' : 'icon-light';
 
 var mb = menubar({
   transparent: true,
-  icon: `${process.cwd()}/icon.png`,
+  icon: `${process.cwd()}/${icon}.png`,
   preloadWindow: true,
-  width: 220,
-  height: 320,
+  width: 280,
+  height: 360,
   resizable: false,
   alwaysOnTop: true
 })
@@ -14,6 +16,8 @@ var mb = menubar({
 const reportIssue = () => {
   shell.openExternal('https://github.com/cdes/figments-injector/issues/new');
 }
+
+let tray = null;
 
 mb.on('ready', function ready () {
   console.log('app is ready')
@@ -25,7 +29,7 @@ mb.on('ready', function ready () {
     {label: 'Quit', type: 'normal', role: 'quit'}
   ])
 
-  const tray = this.tray;
+  tray = this.tray;
 
   tray.on('right-click', function () {
     mb.hideWindow();
@@ -36,4 +40,12 @@ mb.on('ready', function ready () {
 
 mb.on('after-create-window', () => {
   mb.window.openDevTools({mode: 'detach'});
+});
+
+mb.on('hide', () => {
+  tray.setImage(`${process.cwd()}/${icon}.png`);
+});
+
+mb.on('show', () => {
+  tray.setImage(`${process.cwd()}/icon-dark.png`);
 });
