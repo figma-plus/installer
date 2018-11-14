@@ -56,7 +56,7 @@ function setupPaths(location) {
       break;
     case 'win32':
       originalAsar = `${figmaAppLocation}/resources/app.asar`;
-      signature = `${figmaAppLocation}/resources/figments.txt`;
+      signature = `${figmaAppLocation}/resources/figments.json`;
       break;
     default:
       throw new Error('This platform is not supported at this time.');
