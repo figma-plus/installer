@@ -1,11 +1,21 @@
 {
   "name": "figments-injector",
   "version": "1.0.0",
-  "description": "A tool to inject plugins to Figma's desktop app.",
-  "main": "index.js",
-  "author": "Ahmed Al Haddad <ahmed.hdd@gmail.com>",
+  "description": "Injects Figma plugins manager to Figma Desktop.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/cdes/figments-injector",
+  "author": "Ahmed Al Haddad <haddad@ah.sa>",
   "license": "MIT",
+  "devDependencies": {
+    "electron": "^3.0.4",
+    "menubar": "^5.2.3"
+  },
+  "private": true,
   "dependencies": {
+    "jquery": "^3.3.1",
     "asar": "^0.14.3",
     "fs-extra": "^7.0.0",
     "inject-code": "^1.0.0"

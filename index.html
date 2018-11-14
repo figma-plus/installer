@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+  </head>
+  <link rel="stylesheet" href="./style.css">
+  <body>
+    <div id="root">
+      <div id="locating" class="show">
+        <div class="content">
+          <div class="lds-ripple"><div></div><div></div></div>
+          <div class="note">Locating Figma</div>
+        </div>
+        <button id="locate">locate Manually</button>
+      </div>
+      <div id="install">
+        <div class="content">
+          <img src="./figma.svg" width="64" height="64" />
+          <div id="path" class="note">/Applications/Figma.app</div>
+        </div>
+        <button id="inject">install</button>
+      </div>
+      <div id="uninstall">
+        <div class="content">
+        
+        </div>
+        <button id="uninject">uninstall</button>
+      </div>
+      <div id="error">
+
+      </div>
+      <script>
+        // You can also require other files to run in this process
+        require('./renderer.js')
+      </script>
+    </div>
+  </body>
+</html>
