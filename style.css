@@ -3,6 +3,8 @@
 * {
   user-select: none;
   font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: subpixel-antialiased;
+  text-rendering: optimizeSpeed;
 }
 
 body {
@@ -15,7 +17,7 @@ body {
   background: #F8F9FA;
   border-radius: 5px;
   height: 100vh;
-  padding: 16px;
+  padding: 0 16px;
 }
 
 .show {
@@ -34,18 +36,24 @@ body {
 }
 
 .content {
-  height: 224px;
-  margin-bottom: 16px;
+  height: calc(100vh - 96px);
+  margin: 16px 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
+img.demo {
+  width: 100%;
+  height: auto;
+}
+
 .note {
   margin-top: 16px;
-  font-size: 16px;
+  font-size: 14px;
   color: #6b869b;
+  text-align: center;
 }
 
 button {
@@ -76,6 +84,13 @@ button:hover {
 button:active {
   box-shadow: 0 0 5px rgb(95, 125, 201, 0);
   background: rgb(87, 117, 190);   
+}
+
+#uninstall button {
+  background: none;
+  color: #5F7DC9;
+  font-size: 14px;
+  font-weight: normal;
 }
 
 .lds-ripple {

@@ -325,9 +325,10 @@ fs-extra@^4.0.1:
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
-fs-extra@^7.0.0:
+fs-extra@^7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-7.0.1.tgz#4f189c44aa123b895f722804f55ea23eadc348e9"
+  integrity sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==
   dependencies:
     graceful-fs "^4.1.2"
     jsonfile "^4.0.0"
@@ -754,6 +755,11 @@ progress-stream@^1.1.0:
   dependencies:
     speedometer "~0.1.2"
     through2 "~0.2.3"
+
+ps-list@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/ps-list/-/ps-list-6.0.0.tgz#c0ec6b677b77ddbf24b0587fdbda187f7c8ea5c0"
+  integrity sha512-7uWjusNLnMtej5NxY8QV5nbfVoMbyxqOy1kAZMekIHk9NzCUgIjfFfdqdMjYq7+uYNlriKqjgLTrXSfEHxgSZg==
 
 psl@^1.1.24:
   version "1.1.29"

@@ -1,42 +1,73 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
-const app = require('electron').remote.app
+const { app, dialog } = require('electron').remote;
 const asar = require('asar');
 const inject = require('inject-code');
 var fs = require('fs-extra');
+var originalFs = require('original-fs');
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
 const { join } = require('path');
 const $ = require('jquery');
+const psList = require('ps-list');
 
 // setup paths
 let originalAsar;
 let signature;
-switch (process.platform) {
-  case 'darwin':
-    originalAsar = '/Applications/Figma.app/Contents/Resources/app.asar';
-    signature = '/Applications/Figma.app/Contents/Resources/figments.json';
-    break;
-  case 'win32':
+let figmaAppLocation = '/Applications/Figma.app';
+
+const checkInjection = () => {
+  if (fs.existsSync(signature)) {
+    show('uninstall');
+  }
+  else if (fs.existsSync(originalAsar)){
+    show('install');
+  }
+  else {
+    show('locating');
+  }
+}
+
+function setupPaths(location) {
+
+  if(process.platform === 'darwin') {
+    figmaAppLocation = location ? location : figmaAppLocation;
+  }
+  else if(process.platform === 'win32') {
     // the asar is in a versioned directory on windows,
     // so need to figure out the directory name
 
     const figmaDir = `${process.env.LOCALAPPDATA}/Figma`;
+
     const dirs = fs.readdirSync(figmaDir)
       .filter(f =>
         fs.statSync(join(figmaDir, f)).isDirectory()
         && f.startsWith('app-'));
-    
-    // put the newest version at the top
+
     dirs.sort().reverse();
 
-    originalAsar = `${figmaDir}/${dirs[0]}/resources/app.asar`;
-    signature = `${figmaDir}/${dirs[0]}/resources/figments.txt`;
-    break;
-  default:
-    throw new Error('This platform is not supported at this time.');
+    figmaAppLocation = location ? location : `${figmaDir}/${dirs[0]}`;
+  }
+
+  switch (process.platform) {
+    case 'darwin':
+      originalAsar = `${figmaAppLocation}/Contents/Resources/app.asar`;
+      signature = `${figmaAppLocation}/Contents/Resources/figments.json`;
+      break;
+    case 'win32':
+      originalAsar = `${figmaAppLocation}/resources/app.asar`;
+      signature = `${figmaAppLocation}/resources/figments.txt`;
+      break;
+    default:
+      throw new Error('This platform is not supported at this time.');
+  }
+
+  $('#path').text(figmaAppLocation);
+
+  checkInjection();
 }
+
+setupPaths();
 
 function hideAll() {
   $('#locating').removeClass('show');
@@ -55,20 +86,12 @@ function show(id) {
 
 let pollInjection = null;
 
-locateInstallation = () => {
-  if (fs.existsSync(signature)) {
-    show('uninstall');
-  }
-  else {
-    show('install');
-  }
-}
-
 locateFigmaApp = () => {
-  if (fs.existsSync(originalAsar)) {
+  if (fs.existsSync(originalAsar) && !fs.existsSync(signature)) {
+    $('#path').text(figmaAppLocation);
     show('install');
-    locateInstallation();
-    pollInjection = setInterval(locateInstallation, 2000);
+    checkInjection();
+    pollInjection = setInterval(checkInjection, 2000);
   }
 }
 
@@ -76,24 +99,38 @@ locateFigmaApp = () => {
 locateFigmaApp();
 const pollLocateFigmaApp = setInterval(locateFigmaApp, 2000);
 
-function startInjecting () {
+async function startInjecting () {
+
+  let figmaIsRunning = false;
+
+  await (async () => {
+    const processes = await psList();
+    figmaIsRunning = processes.filter(process => process.name.indexOf('Figma') !== -1).length > 0;
+  })();
+
+  if (figmaIsRunning) {
+    dialog.showErrorBox('Sorry..', 'You must quit Figma first.');
+    return;
+  }
+
   const userData = app.getPath('userData');
-  const backupAsar = `${userData}/${originalAsar}.bk`;
+  const backupAsar = `${originalAsar}.bk`;
 
   var input = `${userData}/input`;
   var output = `${userData}/output/app.asar`;
 
   var targetFile = `${userData}/input/window_manager.js`;
   var insertAfter = "this.webContents.on('dom-ready', () => {";
-
+  
   var code = fs.readFileSync('./code.js', 'utf8');
 
-  fs.removeSync(output);
-  fs.removeSync(input);
+  if (fs.existsSync(output)) fs.unlinkSync(output);
+
+  if (fs.existsSync(input)) fs.removeSync(input);
 
   // replace injected packs with backups
   if (fs.existsSync(backupAsar)) {
-    fs.unlinkSync(originalAsar);
+    if (fs.existsSync(originalAsar)) fs.unlinkSync(originalAsar);
     fs.renameSync(backupAsar, originalAsar);
   }
 
@@ -113,29 +150,68 @@ function startInjecting () {
   );
 
 
-  async function repack() {
-    const { stdout, stderr } = await exec('asar pack ./input ./output/app.asar --unpack ./input/*.node');
+  asar.createPackageWithOptions(input, output, {unpackDir: `${input}/*.node`}, writePacked);
 
-    fs.renameSync(originalAsar, backupAsar);
-
-    fs.createReadStream(output).pipe(fs.createWriteStream(originalAsar));
-
-    fs.writeJsonSync(signature, {dateInjected: (new Date()).toString()})
+  function writePacked() {
+    if (fs.existsSync(output)) {
+      fs.renameSync(originalAsar, backupAsar);
+      originalFs.copyFileSync(output, originalAsar);
+      fs.writeJsonSync(signature, {dateInjected: (new Date()).toString()})
+      checkInjection();
+    }
+    else {
+      alert(`File not found: ${output}`);
+    }
   }
-
-  repack();
-
 }
 
-function uninject() {
-  const userData = app.getPath('userData');
-  const backupAsar = `${userData}/${originalAsar}.bk`;
+async function uninject() {
+  let figmaIsRunning = false;
+
+  await (async () => {
+    const processes = await psList();
+    figmaIsRunning = processes.filter(process => process.name.indexOf('Figma') !== -1).length > 0;
+  })();
+
+  if (figmaIsRunning) {
+    dialog.showErrorBox('Sorry..', 'You must quit Figma first.');
+    return;
+  }
+
+  const backupAsar = `${originalAsar}.bk`;
 
   if (fs.existsSync(backupAsar)) {
     fs.unlinkSync(originalAsar);
     fs.renameSync(backupAsar, originalAsar);
     fs.unlinkSync(signature);
+    checkInjection();
   }
+}
+
+function locate() {
+
+  let dialogTitle = "Select Figma Folder";
+  let properties = ["openDirectory"];
+  let filters = [];
+
+  if(process.platform === 'darwin') {
+    dialogTitle = "Select Figma.app";
+    properties = ["openFile"];
+    filters = [{ name: 'App', extensions: ['app'] }]
+  }
+
+  dialog.showOpenDialog({
+    title:dialogTitle,
+    properties: properties,
+    filters: filters,
+  }, (paths) => {
+      if (paths === undefined){
+          console.log("No destination folder selected");
+          return;
+      } else {
+          setupPaths(paths[0]);
+      }
+  });
 }
 
 $('#inject').click(startInjecting);
