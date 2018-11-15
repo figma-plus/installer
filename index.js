@@ -1,4 +1,4 @@
-const { Menu, shell, systemPreferences, app, dialog } = require('electron')
+const { Menu, shell, app, dialog } = require('electron')
 const unhandled = require('electron-unhandled');
 const {openNewGitHubIssue, debugInfo} = require('electron-util');
 
@@ -22,11 +22,9 @@ const rootFolder = process.env.NODE_ENV === 'development'
 ? process.cwd()
 : path.resolve(app.getAppPath(), './');
 
-const icon = systemPreferences.isDarkMode() ? 'icon-dark' : 'icon-light';
-
 var mb = menubar({
   transparent: true,
-  icon: `${rootFolder}/${icon}.png`,
+  icon: `${rootFolder}/trayiconTemplate.png`,
   preloadWindow: true,
   width: 280,
   height: 360,
@@ -53,7 +51,6 @@ const about = () => {
 let tray = null;
 
 mb.on('ready', function ready () {
-  console.log('app is ready')
   
   const contextMenu = Menu.buildFromTemplate([
     {label: 'About', type: 'normal', click: about},
@@ -77,13 +74,4 @@ mb.on('ready', function ready () {
 
 mb.on('after-create-window', () => {
   // mb.window.openDevTools({mode: 'detach'});
-});
-
-mb.on('hide', () => {
-  tray.setImage(`${rootFolder}/${icon}.png`);
-  mb.app.hide();
-});
-
-mb.on('show', () => {
-  tray.setImage(`${rootFolder}/icon-dark.png`);
 });
