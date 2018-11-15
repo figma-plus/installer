@@ -73,6 +73,7 @@ button {
   padding: 0;
   transition: all 0.2s ease;
   box-shadow: 0 0 5px rgb(95, 125, 201, 0);
+  position: relative;
 }
 
 button:hover {
@@ -86,14 +87,34 @@ button:active {
   background: rgb(87, 117, 190);   
 }
 
-#uninstall button {
+#uninstall button,
+button.outline {
   background: none;
   color: #5F7DC9;
   font-size: 14px;
   font-weight: normal;
 }
 
-.lds-ripple {
+button.loading {
+  pointer-events: none;
+}
+
+button > .lds-ripple {
+  display: none;
+  transform: scale(0.5);
+  position: absolute !important;
+}
+
+button.loading > span {
+  display: none !important;
+}
+
+button.loading .lds-ripple div {
+  border-color: #5f7dc9;
+}
+
+.lds-ripple,
+button.loading > .lds-ripple {
   display: inline-block;
   position: relative;
   width: 64px;
