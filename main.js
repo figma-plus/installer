@@ -10,7 +10,6 @@ var mb = menubar({
   width: 280,
   height: 360,
   resizable: false,
-  alwaysOnTop: true
 })
 
 const reportIssue = () => {
@@ -36,14 +35,17 @@ mb.on('ready', function ready () {
     tray.popUpContextMenu(contextMenu);
   })
 
+  mb.showWindow();
+
 })
 
-mb.on('after-create-window', () => {
-  mb.window.openDevTools({mode: 'detach'});
+mb.on('after-create-window', () => {  
+  mb.window.openDevTools();
 });
 
 mb.on('hide', () => {
   tray.setImage(`${process.cwd()}/${icon}.png`);
+  mb.app.hide();
 });
 
 mb.on('show', () => {
