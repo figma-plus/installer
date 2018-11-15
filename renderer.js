@@ -3,6 +3,7 @@
 // All of the Node.js APIs are available in this process.
 const { app, dialog } = require('electron').remote;
 const asar = require('asar');
+const path = require('path');
 const inject = require('inject-code');
 var fs = require('fs-extra');
 var originalFs = require('original-fs');
@@ -15,6 +16,9 @@ const psList = require('ps-list');
 let originalAsar;
 let signature;
 let figmaAppLocation = '/Applications/Figma.app';
+const rootFolder = process.env.NODE_ENV === 'development'
+? process.cwd()
+: path.resolve(app.getAppPath(), './');
 
 const checkInjection = () => {
   if (fs.existsSync(signature)) {
@@ -104,8 +108,8 @@ async function startInjecting () {
   let figmaIsRunning = false;
 
   await (async () => {
-    const processes = await psList();
-    figmaIsRunning = processes.filter(process => process.name.indexOf('Figma') !== -1).length > 0;
+    const ps = await psList();
+    figmaIsRunning = ps.filter(p => p.name.indexOf('Figma') !== -1).length > 0;
   })();
 
   if (figmaIsRunning) {
@@ -122,7 +126,7 @@ async function startInjecting () {
   var targetFile = `${userData}/input/window_manager.js`;
   var insertAfter = "this.webContents.on('dom-ready', () => {";
   
-  var code = fs.readFileSync('./code.js', 'utf8');
+  var code = fs.readFileSync(`${rootFolder}/code.js`, 'utf8');
 
   if (fs.existsSync(output)) fs.unlinkSync(output);
 
@@ -169,8 +173,8 @@ async function uninject() {
   let figmaIsRunning = false;
 
   await (async () => {
-    const processes = await psList();
-    figmaIsRunning = processes.filter(process => process.name.indexOf('Figma') !== -1).length > 0;
+    const ps = await psList();
+    figmaIsRunning = ps.filter(p => p.name.indexOf('Figma') !== -1).length > 0;
   })();
 
   if (figmaIsRunning) {
