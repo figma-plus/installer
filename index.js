@@ -48,7 +48,7 @@ mb.on('ready', function ready () {
     {label: 'Report Issues', type: 'normal', click: reportIssue},
     {type: 'separator'},
     {label: 'Quit', type: 'normal', role: 'quit'},
-    {label: 'Version 1.0', type: 'normal', enabled: false},
+    {label: `Version ${app.getVersion()}`, type: 'normal', enabled: false},
   ])
   
   tray = this.tray;
