@@ -11,6 +11,9 @@ const util = require('util');
 const { join } = require('path');
 const $ = require('jquery');
 const psList = require('ps-list');
+const fkill = require('fkill');
+var exec = require('child_process').exec;
+var execFile = require('child_process').execFile;
 
 // setup paths
 let originalAsar;
@@ -41,7 +44,7 @@ function setupPaths(location) {
     // the asar is in a versioned directory on windows,
     // so need to figure out the directory name
 
-    const figmaDir = `${process.env.LOCALAPPDATA}/Figma`;
+    const figmaDir = `${app.getPath('appData')}/Figma`;
 
     const dirs = fs.readdirSync(figmaDir)
       .filter(f =>
@@ -85,6 +88,7 @@ function show(id) {
   if(!element.hasClass('show')) {
     hideAll();
     $(`#${id}`).addClass('show');
+    $(`#${id} button`).removeClass();
   }
 }
 
@@ -103,20 +107,49 @@ locateFigmaApp = () => {
 locateFigmaApp();
 const pollLocateFigmaApp = setInterval(locateFigmaApp, 2000);
 
-async function startInjecting () {
-
-  let figmaIsRunning = false;
-
-  await (async () => {
-    const ps = await psList();
-    figmaIsRunning = ps.filter(p => p.name.indexOf('Figma') !== -1).length > 0;
-  })();
+async function checkFigmaBeforeRunning(task) {
+  const ps = await psList();
+  const figmaProcess = ps.filter(p => p.name === 'Figma');
+  const figmaIsRunning = figmaProcess.length > 0;
 
   if (figmaIsRunning) {
-    dialog.showErrorBox('Sorry..', 'You must quit Figma first.');
-    return;
+    dialog.showMessageBox({
+      type: 'info',
+      message: 'Figma app is still open, you must quit it first.  Make sure to save your progress before quitting Figma.',
+      buttons: ['Quit Figma', 'Cancel']
+    }, (resp) => {
+      console.log(figmaProcess, resp);
+      
+      if (resp === 0) {
+        // User selected 'Quit Figma'
+        fkill(figmaProcess[0].pid).then(() => {
+          task();
+          runFigma();
+        });
+      }
+      else {
+        $('button').removeClass();
+      }
+    });
   }
+  else {
+    task();
+    runFigma();
+  }
+}
 
+function runFigma() {
+  setTimeout(() => {
+    if(process.platform === 'darwin') {
+      exec(`open ${figmaAppLocation}`);
+    }
+    else if (process.platform === 'win32') {
+      execFile(`${app.getPath('appData')}/Figma/Figma.exe`);
+    }
+  }, 2000);
+}
+
+function startInjecting () {
   const userData = app.getPath('userData');
   const backupAsar = `${originalAsar}.bk`;
 
@@ -164,24 +197,12 @@ async function startInjecting () {
       checkInjection();
     }
     else {
-      alert(`File not found: ${output}`);
+      dialog.showErrorBox('File not found', output);
     }
   }
 }
 
-async function uninject() {
-  let figmaIsRunning = false;
-
-  await (async () => {
-    const ps = await psList();
-    figmaIsRunning = ps.filter(p => p.name.indexOf('Figma') !== -1).length > 0;
-  })();
-
-  if (figmaIsRunning) {
-    dialog.showErrorBox('Sorry..', 'You must quit Figma first.');
-    return;
-  }
-
+function uninject() {
   const backupAsar = `${originalAsar}.bk`;
 
   if (fs.existsSync(backupAsar)) {
@@ -218,6 +239,17 @@ function locate() {
   });
 }
 
-$('#inject').click(startInjecting);
-$('#uninject').click(uninject);
-$('#locate').click(locate);
+$('#inject').click(() => {
+  $('#inject').addClass('loading outline');
+  checkFigmaBeforeRunning(startInjecting);
+});
+
+$('#uninject').click(() => {
+  $('#uninject').addClass('loading outline');
+  checkFigmaBeforeRunning(uninject);
+});
+
+$('#locate').click(() => {
+  $('#locate').addClass('loading');
+  locate();
+});
