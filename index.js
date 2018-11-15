@@ -1,75 +1,77 @@
-const asar = require('asar');
-const inject = require('inject-code');
-var fs = require('fs-extra');
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
-const { join } = require('path');
+const { Menu, shell, app, dialog } = require('electron')
+const unhandled = require('electron-unhandled');
+const {openNewGitHubIssue, debugInfo} = require('electron-util');
 
-// setup paths
-let originalAsar;
-switch (process.platform) {
-  case 'darwin':
-    originalAsar = '/Applications/Figma.app/Contents/Resources/app.asar';
-    break;
-  case 'win32':
-    // the asar is in a versioned directory on windows,
-    // so need to figure out the directory name
+unhandled({
+  showDialog: true,
+	reportButton: error => {
+		openNewGitHubIssue({
+			user: 'cdes',
+			repo: 'figments-injector',
+			body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+		});
+	}
+});
 
-    const figmaDir = `${process.env.LOCALAPPDATA}/Figma`;
-    const dirs = fs.readdirSync(figmaDir)
-      .filter(f =>
-        fs.statSync(join(figmaDir, f)).isDirectory()
-        && f.startsWith('app-'));
-    
-    // put the newest version at the top
-    dirs.sort().reverse();
+// require('electron-debug')();
 
-    originalAsar = `${figmaDir}/${dirs[0]}/resources/app.asar`;
-    break;
-  default:
-    throw new Error('This platform is not supported at this time.');
-}
-const backupAsar = `${originalAsar}.bk`;
+var menubar = require('menubar')
 
-var input = './input';
-var output = "./output/app.asar";
+const path =  require('path');
+const rootFolder = process.env.NODE_ENV === 'development'
+? process.cwd()
+: path.resolve(app.getAppPath(), './');
 
-var targetFile = './input/window_manager.js';
-var insertAfter = "this.webContents.on('dom-ready', () => {";
+var mb = menubar({
+  transparent: true,
+  icon: `${rootFolder}/trayiconTemplate.png`,
+  preloadWindow: true,
+  width: 280,
+  height: 360,
+  resizable: false,
+  // alwaysOnTop: true,
+})
 
-var code = fs.readFileSync('./code.js', 'utf8');
-
-fs.removeSync(output);
-fs.removeSync(input);
-
-// replace injected packs with backups
-if (fs.existsSync(backupAsar)) {
-  fs.unlinkSync(originalAsar);
-  fs.renameSync(backupAsar, originalAsar);
+const reportIssue = () => {
+  shell.openExternal('https://github.com/cdes/figments-injector/issues/new');
 }
 
-// bring figma files
-asar.extractAll(originalAsar, input);
-
-// inject code
-inject(
-  code,
-  {
-    into: targetFile,
-    after: insertAfter,
-    sync: true,
-    contentType: 'code',
-    newLine: 'auto'
-  }
-);
-
-
-async function repack() {
-  const { stdout, stderr } = await exec('asar pack ./input ./output/app.asar --unpack ./input/*.node');
-
-  fs.renameSync(originalAsar, backupAsar);
-
-  fs.createReadStream(output).pipe(fs.createWriteStream(originalAsar));
+const goToWebsite = () => {
+  shell.openExternal('https://github.com/cdes/figments-injector/');
 }
 
-repack();
+const about = () => {
+  dialog.showMessageBox({
+    type: 'info',
+    message: 'Created by Ahmed Al-Haddad @cdes',
+    buttons: ['Close']
+  });
+}
+
+let tray = null;
+
+mb.on('ready', function ready () {
+  
+  const contextMenu = Menu.buildFromTemplate([
+    {label: 'About', type: 'normal', click: about},
+    {label: 'Website', type: 'normal', click: goToWebsite},
+    {label: 'Report Issues', type: 'normal', click: reportIssue},
+    {type: 'separator'},
+    {label: 'Quit', type: 'normal', role: 'quit'},
+    {label: `Version ${app.getVersion()}`, type: 'normal', enabled: false},
+  ])
+  
+  tray = this.tray;
+  
+  tray.on('right-click', function () {
+    mb.hideWindow();
+    tray.popUpContextMenu(contextMenu);
+  })
+  
+  mb.showWindow();
+  
+})
+
+mb.on('after-create-window', () => {
+  // mb.window.openDevTools({mode: 'detach'});
+});

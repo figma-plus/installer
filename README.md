@@ -1,21 +1,27 @@
-# figments-injector (prealpha POC)
-A helper tool that injects Figments (Figma Plugins) into Figma's desktop apps.
+# Figments Injector
+Installs ([Plugins Manager](https://github.com/jachui/figma-plugin-manager)) to Figma Desktop.
 
-## Requirments
-* node
-* yarn
-* `asar` (npm package) globally installed
-* Figma macOS (desktop app)
+![figments](https://user-images.githubusercontent.com/1207863/48588724-57386c00-e949-11e8-838f-81b12b0237e2.gif)
 
 ## How to use
-1. clone the repo & cd into it.
-1. run `yarn`
-1. run `yarn global add asar` (or `npm i -g asar`)
-1. run `node index.js`
-1. That's it!  Run Figma's desktop app and you'll see a a message in devtools console confriming that it worked.
+1. Run the app.
+1. Open the apps menubar icon
+1. Follow the instructions 
 
-## Todo
-- [ ] Inject Figments instead of dumb code.
-- [x] Add support for Windows.
-- [ ] Create a GUI app.
-- [ ] Ship it!
+## Features
+- Finds Figma App automatically (only if installed in the OS default location)
+- Can install [Figma Plugins Manager](https://github.com/jachui/figma-plugin-manager))
+- Can uninstall [Figma Plugins Manager](https://github.com/jachui/figma-plugin-manager)) (why would you do that?)
+- Quits and reruns Figma for you when you install/uninstall.
+
+## Download
+
+Pick the latest build from [Releases Page](https://github.com/cdes/figments-injector/releases)) 
+
+Supported platforms:
+- macOS
+- Windows (WIP)
+
+## License
+
+[MIT](LICENSE.md)

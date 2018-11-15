@@ -1,13 +1,51 @@
 {
   "name": "figments-injector",
-  "version": "1.0.0",
-  "description": "A tool to inject plugins to Figma's desktop app.",
-  "main": "index.js",
-  "author": "Ahmed Al Haddad <ahmed.hdd@gmail.com>",
+  "productName": "Figments Injector",
+  "version": "1.1.1",
+  "description": "Injects Figma plugins manager to Figma Desktop.",
+  "repository": "https://github.com/cdes/figments-injector",
+  "author": "Ahmed Al Haddad <haddad@ah.sa>",
+  "main": "./index.js",
   "license": "MIT",
+  "private": true,
+  "scripts": {
+    "postinstall": "install-app-deps",
+    "start": "electron ./",
+    "pack": "build --dir",
+    "dist": "build"
+  },
+  "build": {
+    "appId": "com.haddad.figments",
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  },
   "dependencies": {
-    "asar": "^0.14.3",
-    "fs-extra": "^7.0.0",
-    "inject-code": "^1.0.0"
+    "asar": "^0.14.5",
+    "electron-debug": "^2.0.0",
+    "electron-unhandled": "^2.1.0",
+    "electron-util": "^0.10.2",
+    "fkill": "^5.3.0",
+    "fs-extra": "^7.0.1",
+    "inject-code": "^1.0.0",
+    "jquery": "^3.3.1",
+    "menubar": "^5.2.3",
+    "ps-list": "^6.0.0"
+  },
+  "devDependencies": {
+    "devtron": "^1.4.0",
+    "electron": "^3.0.9",
+    "electron-builder": "^20.34.0"
   }
 }
