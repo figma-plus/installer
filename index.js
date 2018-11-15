@@ -1,4 +1,17 @@
 const { Menu, shell, systemPreferences, app, dialog } = require('electron')
+const unhandled = require('electron-unhandled');
+const {openNewGitHubIssue, debugInfo} = require('electron-util');
+
+unhandled({
+  showDialog: true,
+	reportButton: error => {
+		openNewGitHubIssue({
+			user: 'cdes',
+			repo: 'figments-injector',
+			body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+		});
+	}
+});
 
 // require('electron-debug')();
 

@@ -14,6 +14,19 @@ const psList = require('ps-list');
 const fkill = require('fkill');
 var exec = require('child_process').exec;
 var execFile = require('child_process').execFile;
+const unhandled = require('electron-unhandled');
+const {openNewGitHubIssue, debugInfo} = require('electron-util');
+
+unhandled({
+  showDialog: true,
+	reportButton: error => {
+		openNewGitHubIssue({
+			user: 'cdes',
+			repo: 'figments-injector',
+			body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+		});
+	}
+});
 
 // setup paths
 let originalAsar;
