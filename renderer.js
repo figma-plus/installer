@@ -16,6 +16,7 @@ var exec = require('child_process').exec;
 var execFile = require('child_process').execFile;
 const unhandled = require('electron-unhandled');
 const {openNewGitHubIssue, debugInfo} = require('electron-util');
+const store = require('./store');
 
 unhandled({
   showDialog: true,
@@ -130,9 +131,7 @@ async function checkFigmaBeforeRunning(task) {
       type: 'info',
       message: 'Figma app is still open, you must quit it first.  Make sure to save your progress before quitting Figma.',
       buttons: ['Quit Figma', 'Cancel']
-    }, (resp) => {
-      console.log(figmaProcess, resp);
-      
+    }, (resp) => {      
       if (resp === 0) {
         // User selected 'Quit Figma'
         fkill(figmaProcess[0].pid).then(() => {
@@ -160,6 +159,15 @@ function runFigma() {
       execFile(`${app.getPath('appData')}/Figma/Figma.exe`);
     }
   }, 2000);
+}
+
+function IsValidJSONString(str) {
+  try {
+      JSON.parse(str);
+  } catch (e) {
+      return false;
+  }
+  return true;
 }
 
 function startInjecting () {
@@ -198,6 +206,40 @@ function startInjecting () {
       newLine: 'auto'
     }
   );
+
+  const devMode = store.get('devMode', false);
+
+  if(devMode) {
+    var devcode = fs.readFileSync(`${rootFolder}/devcode.js`, 'utf8');
+    const devMode = store.get('devMode');
+    const localList = store.get('localList', "[]");
+
+    if(IsValidJSONString(localList)) {
+      devcode = devcode.replace('ARRAY_PLACEHOLDER', localList);
+
+      inject(
+        "webSecurity: false,",
+        {
+          into: targetFile,
+          after: "preload: path.join(__dirname, preloadScript),",
+          sync: true,
+          contentType: 'code',
+          newLine: 'auto'
+        }
+      );
+      
+      inject(
+        devcode,
+        {
+          into: targetFile,
+          after: insertAfter,
+          sync: true,
+          contentType: 'code',
+          newLine: 'auto'
+        }
+      );
+    }
+  }
 
 
   asar.createPackageWithOptions(input, output, {unpackDir: `${input}/*.node`}, writePacked);

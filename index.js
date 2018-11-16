@@ -1,6 +1,11 @@
 const { Menu, shell, app, dialog } = require('electron')
 const unhandled = require('electron-unhandled');
 const {openNewGitHubIssue, debugInfo} = require('electron-util');
+const prompt = require('electron-prompt');
+const store = require('./store');
+
+const dev = false;
+
 
 unhandled({
   showDialog: true,
@@ -13,7 +18,10 @@ unhandled({
 	}
 });
 
-// require('electron-debug')();
+if(dev) {
+  require('electron-debug')();
+}
+
 
 var menubar = require('menubar')
 
@@ -29,7 +37,7 @@ var mb = menubar({
   width: 280,
   height: 360,
   resizable: false,
-  // alwaysOnTop: true,
+  alwaysOnTop: dev,
 })
 
 const reportIssue = () => {
@@ -48,24 +56,67 @@ const about = () => {
   });
 }
 
+const toggleLocalList = (event) => {
+  if(event.checked) {
+    prompt({
+        title: 'Enter JSON',
+        label: 'JSON Array (You could wreck your plugins installation, proceed with caution!)',
+        value: '[]',
+        inputAttrs: {
+            type: 'text',
+            require: true,
+        },
+        height: 150,
+    })
+    .then((r) => {
+        if(r === null) {
+          devMenu.items[devMenu.length - 1].checked = false;
+          tray.setContextMenu(null);
+          mb.showWindow();
+        } else {
+          store.set('devMode', true);
+          store.set('localList', r);
+        }
+    })
+    .catch(console.error);
+  }
+  else {
+    store.delete('devMode');
+    store.delete('localList');
+  }
+}
+
 let tray = null;
+
+const menuItems = [
+  {label: 'About', type: 'normal', click: about},
+  {label: 'Website', type: 'normal', click: goToWebsite},
+  {label: 'Report Issues', type: 'normal', click: reportIssue},
+  {type: 'separator'},
+  {label: 'Quit', type: 'normal', role: 'quit'},
+  {label: `Version ${app.getVersion()}`, type: 'normal', enabled: false},
+];
+
+const devMenuItems = [
+  {type: 'separator'},
+  {label: 'Inject Local Plugins List (Dev)', type: 'checkbox', checked: store.get('devMode', false), click: toggleLocalList}
+];
+
+const baseMenu = Menu.buildFromTemplate(menuItems);
+const devMenu = Menu.buildFromTemplate(menuItems.concat(devMenuItems));
 
 mb.on('ready', function ready () {
   
-  const contextMenu = Menu.buildFromTemplate([
-    {label: 'About', type: 'normal', click: about},
-    {label: 'Website', type: 'normal', click: goToWebsite},
-    {label: 'Report Issues', type: 'normal', click: reportIssue},
-    {type: 'separator'},
-    {label: 'Quit', type: 'normal', role: 'quit'},
-    {label: `Version ${app.getVersion()}`, type: 'normal', enabled: false},
-  ])
-  
   tray = this.tray;
   
-  tray.on('right-click', function () {
+  tray.on('right-click', function (event) {
     mb.hideWindow();
-    tray.popUpContextMenu(contextMenu);
+    if (event.altKey) {      
+      tray.popUpContextMenu(devMenu);
+    }
+    else {
+      tray.popUpContextMenu(baseMenu);
+    }
   })
   
   mb.showWindow();
@@ -73,5 +124,7 @@ mb.on('ready', function ready () {
 })
 
 mb.on('after-create-window', () => {
-  // mb.window.openDevTools({mode: 'detach'});
+  if(dev) {
+    mb.window.openDevTools({mode: 'detach'});
+  }
 });
