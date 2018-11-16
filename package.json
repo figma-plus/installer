@@ -15,21 +15,7 @@
     "dist": "build"
   },
   "build": {
-    "appId": "com.haddad.figments",
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    }
+    "appId": "com.haddad.figments"
   },
   "dependencies": {
     "asar": "^0.14.5",
