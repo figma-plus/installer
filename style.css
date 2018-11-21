@@ -146,3 +146,21 @@ button.loading > .lds-ripple {
     opacity: 0;
   }
 }
+
+#settings {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #a998c7;
+  background: transparent;
+  fill: currentColor;
+  box-shadow: none;
+  height: auto;
+}
+
+#settings:hover {
+  color: #5f7dc9;
+  background: transparent;
+  fill: currentColor;
+  box-shadow: none;
+}

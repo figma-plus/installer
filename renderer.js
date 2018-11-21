@@ -1,7 +1,9 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
-const { app, dialog } = require('electron').remote;
+const electron = require('electron');
+const { remote, ipcRenderer } = electron;
+const { app, dialog } = remote;
 const asar = require('asar');
 const path = require('path');
 const inject = require('inject-code');
@@ -194,8 +196,20 @@ function startInjecting () {
 
   // bring figma files
   asar.extractAll(originalAsar, input);
+  
 
   // inject code
+
+  const useLocalPluginsManager = store.get('useLocalPluginsManager', false);
+
+  if(useLocalPluginsManager) {
+    const localPluginsManagerUrl = store.get('localPluginsManagerUrl', "https://jachui.github.io");
+    code = code.replace('SERVER_URL', localPluginsManagerUrl);
+  }
+  else {
+    code = code.replace('SERVER_URL', "https://jachui.github.io");
+  }
+
   inject(
     code,
     {
@@ -206,41 +220,6 @@ function startInjecting () {
       newLine: 'auto'
     }
   );
-
-  const devMode = store.get('devMode', false);
-
-  if(devMode) {
-    var devcode = fs.readFileSync(`${rootFolder}/devcode.js`, 'utf8');
-    const devMode = store.get('devMode');
-    const localList = store.get('localList', "[]");
-
-    if(IsValidJSONString(localList)) {
-      devcode = devcode.replace('ARRAY_PLACEHOLDER', localList);
-
-      inject(
-        "webSecurity: false,",
-        {
-          into: targetFile,
-          after: "preload: path.join(__dirname, preloadScript),",
-          sync: true,
-          contentType: 'code',
-          newLine: 'auto'
-        }
-      );
-      
-      inject(
-        devcode,
-        {
-          into: targetFile,
-          after: insertAfter,
-          sync: true,
-          contentType: 'code',
-          newLine: 'auto'
-        }
-      );
-    }
-  }
-
 
   asar.createPackageWithOptions(input, output, {unpackDir: `${input}/*.node`}, writePacked);
 
@@ -307,4 +286,8 @@ $('#uninject').click(() => {
 $('#locate').click(() => {
   $('#locate').addClass('loading');
   locate();
+});
+
+$('#settings').click(() => {
+  ipcRenderer.send('openSettings');
 });

@@ -1,4 +1,4 @@
-const { Menu, shell, app, dialog } = require('electron')
+const { Menu, shell, app, dialog, ipcMain } = require('electron')
 const unhandled = require('electron-unhandled');
 const {openNewGitHubIssue, debugInfo} = require('electron-util');
 const prompt = require('electron-prompt');
@@ -56,12 +56,12 @@ const about = () => {
   });
 }
 
-const toggleLocalList = (event) => {
+const toggleLocalPluginsManager = (event) => {
   if(event.checked) {
     prompt({
-        title: 'Enter JSON',
-        label: 'JSON Array (You could wreck your plugins installation, proceed with caution!)',
-        value: '[]',
+        title: 'Local Plugins Manager',
+        label: 'Enter local server that serves the plugin manager packages',
+        value: 'http://localhost:8080',
         inputAttrs: {
             type: 'text',
             require: true,
@@ -70,19 +70,17 @@ const toggleLocalList = (event) => {
     })
     .then((r) => {
         if(r === null) {
-          devMenu.items[devMenu.length - 1].checked = false;
-          tray.setContextMenu(null);
           mb.showWindow();
         } else {
-          store.set('devMode', true);
-          store.set('localList', r);
+          store.set('useLocalPluginsManager', true);
+          store.set('localPluginsManagerUrl', r);
         }
     })
     .catch(console.error);
   }
   else {
-    store.delete('devMode');
-    store.delete('localList');
+    store.delete('useLocalPluginsManager');
+    store.delete('localPluginsManagerUrl');
   }
 }
 
@@ -97,9 +95,11 @@ const menuItems = [
   {label: `Version ${app.getVersion()}`, type: 'normal', enabled: false},
 ];
 
+const getUseLocalPlugin = () => store.get('useLocalPluginsManager', false);
+
 const devMenuItems = [
   {type: 'separator'},
-  {label: 'Inject Local Plugins List (Dev)', type: 'checkbox', checked: store.get('devMode', false), click: toggleLocalList}
+  {label: 'Use local Plugins Manager (Dev)', type: 'checkbox', checked: false, click: toggleLocalPluginsManager},
 ];
 
 const baseMenu = Menu.buildFromTemplate(menuItems);
@@ -110,18 +110,22 @@ mb.on('ready', function ready () {
   tray = this.tray;
   
   tray.on('right-click', function (event) {
-    mb.hideWindow();
-    if (event.altKey) {      
-      tray.popUpContextMenu(devMenu);
-    }
-    else {
-      tray.popUpContextMenu(baseMenu);
-    }
+    openSettings(tray);
   })
+
+  ipcMain.on('openSettings', () => {
+    openSettings(tray);
+  });
   
   mb.showWindow();
   
 })
+
+function openSettings (tray) {
+  mb.hideWindow();
+  devMenu.items[devMenu.items.length - 1].checked = getUseLocalPlugin();
+  tray.popUpContextMenu(devMenu);
+}
 
 mb.on('after-create-window', () => {
   if(dev) {
