@@ -204,12 +204,35 @@ function startInjecting () {
 
   if(useLocalPluginsManager) {
     const localPluginsManagerUrl = store.get('localPluginsManagerUrl', "https://jachui.github.io");
-    code = code.replace('SERVER_URL', localPluginsManagerUrl);
+    code = code.replace(/SERVER_URL/g, localPluginsManagerUrl);
+
+    // since we will serve local manager from http, we need this
+    inject(
+      "webSecurity: false,",
+      {
+        into: targetFile,
+        after: "preload: path.join(__dirname, preloadScript),",
+        sync: true,
+        contentType: 'code',
+        newLine: 'auto'
+      }
+    );
   }
   else {
-    code = code.replace('SERVER_URL', "https://jachui.github.io");
+    code = code.replace(/SERVER_URL/g, "https://jachui.github.io");
   }
 
+  const devMode = store.get('devMode', false);
+  
+  // enable developer mode in the plugin manager
+  if(devMode) {
+    const pluginDevMode = `
+    this.webContents.executeJavaScript('window.pluginDevMode = true;');
+    `;
+    code = pluginDevMode + code;    
+  }
+
+  // inject our manager code
   inject(
     code,
     {

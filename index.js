@@ -4,7 +4,7 @@ const {openNewGitHubIssue, debugInfo} = require('electron-util');
 const prompt = require('electron-prompt');
 const store = require('./store');
 
-const dev = false;
+const dev = true;
 
 
 unhandled({
@@ -84,6 +84,15 @@ const toggleLocalPluginsManager = (event) => {
   }
 }
 
+const toggleDevMode = (event) => {
+  if(event.checked) {
+    store.set('devMode', true);
+  }
+  else {
+    store.delete('devMode');
+  }
+}
+
 let tray = null;
 
 const menuItems = [
@@ -96,10 +105,12 @@ const menuItems = [
 ];
 
 const getUseLocalPlugin = () => store.get('useLocalPluginsManager', false);
+const getDevMode = () => store.get('devMode', false);
 
 const devMenuItems = [
   {type: 'separator'},
-  {label: 'Use local Plugins Manager (Dev)', type: 'checkbox', checked: false, click: toggleLocalPluginsManager},
+  {label: 'Developer Mode in Plugin Manager', type: 'checkbox', checked: false, click: toggleDevMode},
+  {label: 'Local Plugins Manager', type: 'checkbox', checked: false, click: toggleLocalPluginsManager},
 ];
 
 const baseMenu = Menu.buildFromTemplate(menuItems);
@@ -124,6 +135,7 @@ mb.on('ready', function ready () {
 function openSettings (tray) {
   mb.hideWindow();
   devMenu.items[devMenu.items.length - 1].checked = getUseLocalPlugin();
+  devMenu.items[devMenu.items.length - 2].checked = getDevMode();
   tray.popUpContextMenu(devMenu);
 }
 
