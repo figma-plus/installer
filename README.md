@@ -1,4 +1,4 @@
-# Figments Injector
+# Figma Plugins Desktop Injector
 Installs ([Plugins Manager](https://github.com/jachui/figma-plugin-manager)) to Figma Desktop.
 
 ![figments](https://user-images.githubusercontent.com/1207863/48588724-57386c00-e949-11e8-838f-81b12b0237e2.gif)
