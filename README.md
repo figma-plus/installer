@@ -16,7 +16,7 @@ Installs ([Plugins Manager](https://github.com/jachui/figma-plugin-manager)) to 
 
 ## Download
 
-Pick the latest build from [Releases Page](https://github.com/cdes/figments-injector/releases)) 
+Pick the latest build from [Releases Page](https://github.com/cdes/figma-plugins-desktop-injector/releases)) 
 
 Supported platforms:
 - macOS
