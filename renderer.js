@@ -203,8 +203,8 @@ function startInjecting () {
   const useLocalPluginsManager = store.get('useLocalPluginsManager', false);
 
   if(useLocalPluginsManager) {
-    const localPluginsManagerUrl = store.get('localPluginsManagerUrl', "https://jachui.github.io");
-    code = code.replace(/SERVER_URL/g, localPluginsManagerUrl);
+    const localPluginsManagerUrl = store.get('localPluginsManagerUrl', "https://jachui.github.io/figma-plugin-manager");
+    code = code.replace(/SERVER_URL/g, localPluginsManagerUrl.replace(/\/$/, ""));
 
     // since we will serve local manager from http, we need this
     inject(
@@ -219,7 +219,7 @@ function startInjecting () {
     );
   }
   else {
-    code = code.replace(/SERVER_URL/g, "https://jachui.github.io");
+    code = code.replace(/SERVER_URL/g, "https://jachui.github.io/figma-plugin-manager");
   }
 
   const devMode = store.get('devMode', false);

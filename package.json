@@ -1,9 +1,9 @@
 {
-  "name": "figments-injector",
-  "productName": "Figments Injector",
-  "version": "1.4.1",
+  "name": "figma-plugins-desktop-injector",
+  "productName": "Figma Plugins Desktop Injector",
+  "version": "1.4.2",
   "description": "Injects Figma plugins manager to Figma Desktop.",
-  "repository": "https://github.com/cdes/figments-injector",
+  "repository": "https://github.com/cdes/figma-plugins-desktop-injector",
   "author": "Ahmed Al Haddad <haddad@ah.sa>",
   "main": "./index.js",
   "license": "MIT",
@@ -20,6 +20,7 @@
   "dependencies": {
     "asar": "^0.14.5",
     "electron-debug": "^2.0.0",
+    "electron-is-dev": "^1.0.1",
     "electron-prompt": "^1.2.0",
     "electron-store": "^2.0.0",
     "electron-unhandled": "^2.1.0",

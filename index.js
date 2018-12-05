@@ -3,8 +3,9 @@ const unhandled = require('electron-unhandled');
 const {openNewGitHubIssue, debugInfo} = require('electron-util');
 const prompt = require('electron-prompt');
 const store = require('./store');
+const isDev = require('electron-is-dev');
 
-const dev = true;
+const dev = isDev;
 
 
 unhandled({
