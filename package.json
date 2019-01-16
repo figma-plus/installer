@@ -1,7 +1,7 @@
 {
   "name": "figma-plugins-desktop-injector",
   "productName": "Figma Plugins Desktop Injector",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Injects Figma plugins manager to Figma Desktop.",
   "repository": "https://github.com/cdes/figma-plugins-desktop-injector",
   "author": "Ahmed Al Haddad <haddad@ah.sa>",

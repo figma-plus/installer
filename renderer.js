@@ -205,18 +205,6 @@ function startInjecting () {
   if(useLocalPluginsManager) {
     const localPluginsManagerUrl = store.get('localPluginsManagerUrl', "https://jachui.github.io/figma-plugin-manager");
     code = code.replace(/SERVER_URL/g, localPluginsManagerUrl.replace(/\/$/, ""));
-
-    // since we will serve local manager from http, we need this
-    inject(
-      "webSecurity: false,",
-      {
-        into: targetFile,
-        after: "preload: path.join(__dirname, preloadScript),",
-        sync: true,
-        contentType: 'code',
-        newLine: 'auto'
-      }
-    );
   }
   else {
     code = code.replace(/SERVER_URL/g, "https://jachui.github.io/figma-plugin-manager");
@@ -230,6 +218,20 @@ function startInjecting () {
     this.webContents.executeJavaScript('window.pluginDevMode = true;');
     `;
     code = pluginDevMode + code;    
+  }
+
+  if (devMode || useLocalPluginsManager) {
+    // since we will serve local manager from http, we need this
+    inject(
+      "webSecurity: false,",
+      {
+        into: targetFile,
+        after: "preload: path.join(__dirname, preloadScript),",
+        sync: true,
+        contentType: 'code',
+        newLine: 'auto'
+      }
+    );
   }
 
   // inject our manager code
