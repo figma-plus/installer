@@ -15,7 +15,14 @@
     "dist": "build"
   },
   "build": {
-    "appId": "com.haddad.figments"
+    "appId": "com.haddad.figments",
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "target": "zip"
+    },
+    "win": {
+      "target": "portable"
+    }
   },
   "dependencies": {
     "asar": "^0.14.5",

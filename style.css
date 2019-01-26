@@ -7,10 +7,13 @@
   text-rendering: optimizeSpeed;
 }
 
+::-webkit-scrollbar { display: none; }
+
 body {
   margin: 0;
   padding: 0;
   color: #395163;
+  overflow: hidden;
 }
 
 #root {    
