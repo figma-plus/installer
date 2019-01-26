@@ -20,12 +20,21 @@ const unhandled = require('electron-unhandled');
 const { openNewGitHubIssue, debugInfo } = require('electron-util');
 const store = require('./store');
 
+let removeSync;
+
+if (process.platform === 'darwin') {
+  removeSync = fs.unlinkSync;
+}
+else if (process.platform === 'win32') {
+  removeSync = fs.removeSync;
+}
+
 unhandled({
   showDialog: true,
   reportButton: error => {
     openNewGitHubIssue({
       user: 'cdes',
-      repo: 'figments-injector',
+      repo: 'figma-plugin-manager-desktop',
       body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
     });
   }
@@ -193,9 +202,8 @@ function startInjecting() {
 
   var code = fs.readFileSync(`${rootFolder}/code.js`, 'utf8');
 
-  if (fs.existsSync(output)) fs.removeSync(output);
-
-  if (fs.existsSync(input)) fs.removeSync(input);
+  if (fs.existsSync(output)) removeSync(output);
+  if (fs.existsSync(input)) removeSync(input);
 
   // replace injected packs with backups
   if (fs.existsSync(backupAsar)) {
@@ -260,7 +268,7 @@ function startInjecting() {
   function writePacked() {
     if (fs.existsSync(output)) {
       originalFs.copyFileSync(originalAsar, originalAsar + '.bk');
-      fs.removeSync(originalAsar);
+      removeSync(originalAsar);
       originalFs.copyFileSync(output, originalAsar);
       fs.writeJsonSync(signature, { dateInjected: (new Date()).toString() })
       checkInjection();
@@ -275,9 +283,9 @@ function uninject() {
   const backupAsar = `${originalAsar}.bk`;
 
   if (fs.existsSync(backupAsar)) {
-    fs.removeSync(originalAsar);
+    removeSync(originalAsar);
     originalFs.copyFileSync(backupAsar, originalAsar);
-    fs.removeSync(backupAsar);
+    removeSync(backupAsar);
     fs.unlinkSync(signature);
     checkInjection();
   }
