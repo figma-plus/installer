@@ -20,7 +20,7 @@ Pick the latest build from [Releases Page](https://github.com/cdes/figma-plugins
 
 Supported platforms:
 - macOS
-- Windows (WIP)
+- Windows
 
 ## License
 
