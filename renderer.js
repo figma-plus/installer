@@ -8,6 +8,7 @@ const asar = require('asar');
 const path = require('path');
 const inject = require('inject-code');
 var fs = require('fs-extra');
+const jetpack = require('fs-jetpack');
 var originalFs = require('original-fs');
 const util = require('util');
 const { join } = require('path');
@@ -23,10 +24,10 @@ const store = require('./store');
 let removeSync;
 
 if (process.platform === 'darwin') {
-  removeSync = fs.unlinkSync;
+  removeSync = jetpack.remove;
 }
 else if (process.platform === 'win32') {
-  removeSync = fs.removeSync;
+  removeSync = jetpack.remove;
 }
 
 unhandled({
@@ -114,6 +115,13 @@ function show(id) {
     hideAll();
     $(`#${id}`).addClass('show');
     $(`#${id} button`).removeClass();
+  }
+
+  if (id === 'install') {
+    $('#dropdown').show();
+  }
+  else {
+    $('#dropdown').hide();
   }
 }
 
@@ -207,7 +215,7 @@ function startInjecting() {
 
   // replace injected packs with backups
   if (fs.existsSync(backupAsar)) {
-    if (fs.existsSync(originalAsar)) fs.unlinkSync(originalAsar);
+    if (fs.existsSync(originalAsar)) removeSync(originalAsar);
     fs.renameSync(backupAsar, originalAsar);
   }
 
@@ -286,7 +294,7 @@ function uninject() {
     removeSync(originalAsar);
     originalFs.copyFileSync(backupAsar, originalAsar);
     removeSync(backupAsar);
-    fs.unlinkSync(signature);
+    removeSync(signature);
     checkInjection();
   }
 }
@@ -318,6 +326,7 @@ function locate() {
 }
 
 $('#inject').click(() => {
+  store.set('devMode', false);
   $('#inject').addClass('loading outline');
   checkFigmaBeforeRunning(startInjecting);
 });
@@ -332,6 +341,12 @@ $('#locate').click(() => {
   locate();
 });
 
-$('#settings').click(() => {
-  ipcRenderer.send('openSettings');
+$('#devmode').click(() => {
+  store.set('devMode', true);
+  $('#inject').addClass('loading outline');
+  checkFigmaBeforeRunning(startInjecting);
+});
+
+$('#close').click(() => {
+  app.quit();
 });
