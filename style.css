@@ -1,10 +1,20 @@
-@import "./fonts/fonts.css";
 
 * {
   user-select: none;
-  font-family: 'Roboto', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeSpeed;
+
+}
+
+*, *::after, *::before {
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+	cursor: default;
+}
+
+* body {
+  -webkit-app-region: drag !important;
 }
 
 ::-webkit-scrollbar { display: none; }
@@ -14,6 +24,7 @@ body {
   padding: 0;
   color: #395163;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 #root {    
@@ -48,15 +59,17 @@ body {
 }
 
 img.demo {
-  width: 100%;
-  height: auto;
+  width: 172px;
+  height: 96px;
 }
 
 .note {
-  margin-top: 16px;
+  margin: 16px auto 0;
   font-size: 14px;
   color: #6b869b;
   text-align: center;
+  max-width: 240px;
+  word-wrap: break-word;
 }
 
 button {
@@ -93,9 +106,13 @@ button:active {
 #uninstall button,
 button.outline {
   background: none;
-  color: #5F7DC9;
+  color: #a5abba;
   font-size: 14px;
-  font-weight: normal;
+  box-shadow: none;
+}
+
+#uninstall button:hover {
+  color: #5F7DC9;
 }
 
 button.loading {
@@ -217,4 +234,61 @@ div.nav button:hover {
   background: transparent;
   fill: currentColor;
   box-shadow: none;
+}
+
+h3 {
+    margin: 0;
+    text-align: left;
+}
+
+ol {
+    margin: 0 0 0 14px;
+    padding: 0;
+    text-align: left;
+    font-size: 12px;
+}
+
+
+@keyframes changeLetter {
+  0% {
+    content: "👩‍💻";
+  }
+  9% {
+    content: "👩🏻‍💻";
+  }
+  18% {
+    content: "👩🏼‍💻";
+  }
+  27% {
+    content: "👩🏽‍💻";
+  }
+  36% {
+    content: "👩🏾‍💻";
+  }
+  45% {
+    content: "👩🏿‍💻";
+  }
+  54% {
+    content: "👨‍💻";
+  }
+  63% {
+    content: "👨🏻‍💻";
+  }
+  72% {
+    content: "👨🏼‍💻";
+  }
+  81% {
+    content: "👨🏽‍💻";
+  }
+  90% {
+    content: "👨🏾‍💻";
+  }
+  100% {
+    content: "👨🏿‍💻";
+  }
+}
+
+#devmode span:after {
+  content: "";
+  animation: changeLetter 2s linear infinite alternate;
 }

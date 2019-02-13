@@ -2,21 +2,13 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const electron = require('electron');
-const { remote, ipcRenderer } = electron;
+const { remote } = electron;
 const { app, dialog } = remote;
 const asar = require('asar');
 const path = require('path');
-const inject = require('inject-code');
 var fs = require('fs-extra');
-const jetpack = require('fs-jetpack');
 var originalFs = require('original-fs');
-const util = require('util');
-const { join } = require('path');
 const $ = require('jquery');
-const psList = require('ps-list');
-const kill = require('tree-kill');
-var exec = require('child_process').exec;
-var execFile = require('child_process').execFile;
 const unhandled = require('electron-unhandled');
 const { openNewGitHubIssue, debugInfo } = require('electron-util');
 const store = require('./store');
@@ -24,10 +16,11 @@ const store = require('./store');
 let removeSync;
 
 if (process.platform === 'darwin') {
+  const jetpack = require('fs-jetpack');
   removeSync = jetpack.remove;
 }
 else if (process.platform === 'win32') {
-  removeSync = jetpack.remove;
+  removeSync = fs.removeSync;
 }
 
 unhandled({
@@ -50,11 +43,20 @@ const rootFolder = process.env.NODE_ENV === 'development'
   : path.resolve(app.getAppPath(), './');
 
 const checkInjection = () => {
+  const devmodebtn = $('#devmode');
   if (fs.existsSync(signature)) {
     show('uninstall');
+
+    if (store.get('devMode', false)) {
+      devmodebtn.html(devmodebtn.html().replace("Turn On", "Turn Off"));
+    }
+    else {
+      devmodebtn.html(devmodebtn.html().replace("Turn Off", "Turn On"));
+    }
   }
   else if (fs.existsSync(originalAsar)) {
     show('install');
+    devmodebtn.html(devmodebtn.html().replace("Turn Off", "Turn On"));
   }
   else {
     show('locating');
@@ -74,7 +76,7 @@ function setupPaths(location) {
 
     const dirs = fs.readdirSync(figmaDir)
       .filter(f =>
-        fs.statSync(join(figmaDir, f)).isDirectory()
+        fs.statSync(path.join(figmaDir, f)).isDirectory()
         && f.startsWith('app-'));
 
     dirs.sort().reverse();
@@ -117,7 +119,7 @@ function show(id) {
     $(`#${id} button`).removeClass();
   }
 
-  if (id === 'install') {
+  if (id !== 'locating') {
     $('#dropdown').show();
   }
   else {
@@ -141,6 +143,9 @@ locateFigmaApp();
 const pollLocateFigmaApp = setInterval(locateFigmaApp, 2000);
 
 async function checkFigmaBeforeRunning(task) {
+  const psList = require('ps-list');
+  const kill = require('tree-kill');
+
   const ps = await psList();
   let figmaProcess;
   switch (process.platform) {
@@ -179,6 +184,9 @@ async function checkFigmaBeforeRunning(task) {
 }
 
 function runFigma() {
+  const exec = require('child_process').exec;
+  const execFile = require('child_process').execFile;
+
   setTimeout(() => {
     if (process.platform === 'darwin') {
       exec(`open ${figmaAppLocation}`);
@@ -187,15 +195,6 @@ function runFigma() {
       execFile(`${app.getPath('appData').slice(0, -7)}Local\\Figma/Figma.exe`);
     }
   }, 2000);
-}
-
-function IsValidJSONString(str) {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
 }
 
 function startInjecting() {
@@ -216,7 +215,9 @@ function startInjecting() {
   // replace injected packs with backups
   if (fs.existsSync(backupAsar)) {
     if (fs.existsSync(originalAsar)) removeSync(originalAsar);
-    fs.renameSync(backupAsar, originalAsar);
+    removeSync(originalAsar);
+    originalFs.copyFileSync(backupAsar, originalAsar);
+    removeSync(backupAsar);
   }
 
   // bring figma files
@@ -244,6 +245,8 @@ function startInjecting() {
     `;
     code = pluginDevMode + code;
   }
+
+  const inject = require('inject-code');
 
   if (devMode || useLocalPluginsManager) {
     // since we will serve local manager from http, we need this
@@ -342,7 +345,7 @@ $('#locate').click(() => {
 });
 
 $('#devmode').click(() => {
-  store.set('devMode', true);
+  store.set('devMode', !store.get('devMode', false));
   $('#inject').addClass('loading outline');
   checkFigmaBeforeRunning(startInjecting);
 });

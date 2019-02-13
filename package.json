@@ -1,7 +1,7 @@
 {
   "name": "figma-plugins-desktop-injector",
   "productName": "Figma Plus",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "description": "Injects Figma plugins manager to Figma Desktop.",
   "repository": "https://github.com/cdes/figma-plugins-desktop-injector",
   "author": "Ahmed Al Haddad <haddad@ah.sa>",
