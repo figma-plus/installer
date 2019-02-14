@@ -4,17 +4,12 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeSpeed;
-
-}
-
-*, *::after, *::before {
-	-webkit-user-select: none;
-	-webkit-user-drag: none;
 	cursor: default;
 }
 
-* body {
-  -webkit-app-region: drag !important;
+img {
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
 }
 
 ::-webkit-scrollbar { display: none; }
@@ -173,6 +168,7 @@ div.nav {
   right: 8px;
   left: 8px;
   display: flex;
+  z-index: 999;
 }
 
 div.nav div:last-child {
