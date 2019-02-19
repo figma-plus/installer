@@ -1,9 +1,9 @@
 {
-  "name": "figma-plugins-desktop-injector",
+  "name": "installer",
   "productName": "Figma Plus",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Injects Figma plugins manager to Figma Desktop.",
-  "repository": "https://github.com/cdes/figma-plugins-desktop-injector",
+  "repository": "https://github.com/figma-plus/installer",
   "author": "Ahmed Al Haddad <haddad@ah.sa>",
   "main": "./index.js",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "dist": "build"
   },
   "build": {
-    "appId": "com.haddad.figments",
+    "appId": "com.figmaplus.installer",
     "mac": {
       "category": "public.app-category.graphics-design",
       "target": "zip"
