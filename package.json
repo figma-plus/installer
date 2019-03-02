@@ -1,7 +1,7 @@
 {
   "name": "installer",
   "productName": "Figma Plus",
-  "version": "1.6.1",
+  "version": "1.0.0",
   "description": "Injects Figma plugins manager to Figma Desktop.",
   "repository": "https://github.com/figma-plus/installer",
   "author": "Ahmed Al Haddad <haddad@ah.sa>",
